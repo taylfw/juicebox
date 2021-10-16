@@ -215,9 +215,8 @@ async function getAllTags() {
   try {
     const { rows } = await client.query(`
     SELECT * FROM tags
-    WHERE name
-    IN ($1, $2, $3);
     `);
+    return rows;
   } catch (err) {
     console.log("There was an error getting all tags...");
     throw err;
