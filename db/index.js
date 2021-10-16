@@ -184,20 +184,33 @@ async function getPostsByUser(userId) {
   }
 }
 
-async function createTags() {
+async function createTags(tagList) {
+  if (tagList.length === 0 || !tagList) {
+    return;
+  }
+
+  // need something like: $1), ($2), ($3
+  const insertValues = tagList.map((_, index) => `$${index + 1}`).join("), (");
+  // then we can use: (${ insertValues }) in our string template
+
+  // need something like $1, $2, $3
+  const selectValues = tagList.map((_, index) => `$${index + 1}`).join(", ");
+  // then we can use (${ selectValues }) in our string template
+
   try {
-    const {
-      rows: [tag],
-    } = await client.query(
+    await client.query(
       `
       INSERT INTO tags(name) 
-      VALUES ($1), ($2), ($3)
-      ON CONFLICT (name) DO NOTHING;;
-    `,
-      [authorId, title, content]
+      VALUES (${insertValues})
+      ON CONFLICT (name) DO NOTHING;
+    `
     );
 
-    return tag;
+    const { rows } = await client.query(`
+      SELECT * FROM tags
+      WHERE name (${selectValues});
+    `);
+    return rows;
   } catch (error) {
     throw error;
   }
