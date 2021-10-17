@@ -8,10 +8,15 @@ usersRouter.use((req, res, next) => {
   next();
 });
 
-usersRouter.get("/", (req, res) => {
-  res.send({
-    users,
-  });
+usersRouter.get("/", async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    res.send({
+      users,
+    });
+  } catch (err) {
+    throw err;
+  }
 });
 
 module.exports = usersRouter;
